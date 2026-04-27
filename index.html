@@ -1259,7 +1259,7 @@
         <div class="stamp">上午</div>
         <div class="message">
           <img class="avatar" id="chatAvatar" src="heiman.png" alt="">
-          <div class="bubble media-bubble"><video src="希敏A.mp4" controls playsinline preload="metadata" data-preview-type="video" data-preview-src="希敏A.mp4"></video></div>
+          <div class="bubble media-bubble"><video src="博雅生日祝福.mp4" playsinline preload="metadata" muted data-preview-type="video" data-preview-src="博雅生日祝福.mp4"></video></div>
         </div>
       </div>
       <div class="composer" aria-label="输入栏">
@@ -1310,7 +1310,7 @@
         avatar: "heiman.png",
         message: "[视频]",
         initialMessages: [
-          { type: "video", src: "希敏A.mp4", label: "希敏A.mp4" }
+          { type: "video", src: "博雅生日祝福.mp4", label: "博雅生日祝福.mp4" }
         ],
         delayedMessages: [
           { delay: 30000, type: "text", text: "当你觉得大山中学莫名其妙时......" }
@@ -1322,7 +1322,7 @@
           b: "诶，我不觉得"
         },
         nextMessages: [
-          { type: "video", src: "锦囊-heiman.mp4", label: "锦囊-heiman.mp4" }
+          { type: "text", text: "由曾莹协助播放——" }
         ]
       },
       yy: {
@@ -1425,7 +1425,7 @@
           b: "反正不在英国"
         },
         nextMessages: [
-          { type: "video", src: "LX.mp4", label: "LX.mp4" }
+          { type: "video", src: "lx.mp4", label: "lx.mp4" }
         ]
       },
       jiangchuan: {
@@ -1507,7 +1507,7 @@
         nextMessages: [
           { type: "image", src: "xiaotong-1.png", label: "会场照片" },
           { delay: 2000, type: "text", text: "想起你们俩个一起在办公室的乐趣时刻" },
-          { delay: 4000, type: "video", src: "2799_1776999760_raw.mp4", label: "2799_1776999760_raw.mp4" },
+          { delay: 4000, type: "video", src: "晓彤.mp4", label: "晓彤.mp4" },
           { delay: 6000, type: "text", text: "还有，练普拉提也会想到你，还有实在无法忍住不吃晚饭的时候，也会想到" },
           { delay: 8000, type: "audio", src: "20260424_110328.m4a", label: "20260424_110328.m4a" }
         ]
@@ -1630,7 +1630,7 @@
       let bubbleClass = "bubble";
       if (type === "video") {
         bubbleClass = "bubble media-bubble";
-        bubbleContent = `<video src="${escapeHtml(src)}" controls playsinline preload="metadata" data-preview-type="video" data-preview-src="${escapeHtml(src)}"></video>`;
+        bubbleContent = `<video src="${escapeHtml(src)}" playsinline preload="metadata" muted data-preview-type="video" data-preview-src="${escapeHtml(src)}"></video>`;
       } else if (type === "image") {
         bubbleClass = "bubble media-bubble";
         bubbleContent = `<img src="${escapeHtml(src)}" alt="${escapeHtml(label || "图片消息")}" data-preview-type="image" data-preview-src="${escapeHtml(src)}">`;
@@ -1908,6 +1908,13 @@
       }
       const media = event.target.closest("[data-preview-type]");
       if (!media) return;
+      if (media.dataset.previewType === "video") return;
+      openMediaPreview(media.dataset.previewType, media.dataset.previewSrc);
+    });
+
+    messages.addEventListener("dblclick", event => {
+      const media = event.target.closest("[data-preview-type]");
+      if (!media || media.dataset.previewType !== "video") return;
       openMediaPreview(media.dataset.previewType, media.dataset.previewSrc);
     });
 
