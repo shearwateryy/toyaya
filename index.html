@@ -1,0 +1,1943 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>微信</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      color-scheme: light;
+      --wechat-green: #07c160;
+      --text: #111;
+      --muted: #7b7b7b;
+      --hairline: #dedede;
+      --page: #ededed;
+      --bar: #f7f7f7;
+      --bubble: #95ec69;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #1f1f1f;
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 2vh 0;
+    }
+
+    button {
+      border: 0;
+      padding: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .phone {
+      position: relative;
+      width: min(390px, calc(96vh * 390 / 844));
+      height: min(844px, 96vh);
+      aspect-ratio: 390 / 844;
+      overflow: hidden;
+      background: var(--page);
+      border-radius: 34px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .42);
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background: var(--page);
+    }
+
+    .statusbar {
+      height: 44px;
+      padding: 14px 22px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0;
+      background: var(--bar);
+      user-select: none;
+    }
+
+    .signals {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .bars i {
+      width: 3px;
+      border-radius: 1px;
+      background: #111;
+      display: block;
+    }
+
+    .bars i:nth-child(1) { height: 4px; }
+    .bars i:nth-child(2) { height: 6px; }
+    .bars i:nth-child(3) { height: 9px; }
+    .bars i:nth-child(4) { height: 12px; }
+
+    .wifi {
+      width: 15px;
+      height: 11px;
+      border: 2px solid #111;
+      border-bottom: 0;
+      border-radius: 14px 14px 0 0;
+      transform: scaleX(.9);
+    }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #111;
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 15px;
+      height: 6px;
+      border-radius: 1px;
+      background: #111;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      border-radius: 0 2px 2px 0;
+      background: #111;
+    }
+
+    .topbar {
+      height: 48px;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 46px 1fr 46px;
+      align-items: center;
+      background: var(--bar);
+      border-bottom: .5px solid var(--hairline);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      justify-self: end;
+    }
+
+    .icon-btn:first-child {
+      justify-self: start;
+    }
+
+    .icon-btn svg,
+    .tab svg,
+    .cell-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .view {
+      min-height: 0;
+      overflow-y: auto;
+      display: none;
+      background: var(--page);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .list {
+      background: #fff;
+    }
+
+    .chat-row,
+    .contact-row,
+    .menu-row {
+      min-height: 72px;
+      display: grid;
+      align-items: center;
+      text-align: left;
+      background: #fff;
+    }
+
+    .chat-row {
+      grid-template-columns: 56px 1fr 52px;
+      column-gap: 12px;
+      width: 100%;
+      padding: 8px 14px 8px 16px;
+    }
+
+    .chat-row + .chat-row,
+    .contact-row + .contact-row,
+    .menu-row + .menu-row {
+      border-top: .5px solid #e5e5e5;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #ddd;
+      display: block;
+    }
+
+    .row-main {
+      min-width: 0;
+      align-self: stretch;
+      padding: 8px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .name-line {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .name {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .preview {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #888;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .time {
+      align-self: start;
+      padding-top: 11px;
+      color: #b0b0b0;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .badge {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #fa5151;
+      flex: 0 0 auto;
+    }
+
+    .section-title {
+      height: 28px;
+      padding: 7px 16px 0;
+      color: #888;
+      font-size: 13px;
+    }
+
+    .contact-row {
+      grid-template-columns: 46px 1fr;
+      column-gap: 12px;
+      padding: 8px 16px;
+      min-height: 58px;
+    }
+
+    .contact-row .avatar {
+      width: 38px;
+      height: 38px;
+    }
+
+    .contact-name {
+      font-size: 16px;
+    }
+
+    .cell-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--wechat-green);
+    }
+
+    .cell-icon.blue {
+      background: #5b8def;
+    }
+
+    .cell-icon.orange {
+      background: #f5a623;
+    }
+
+    .menu-group {
+      margin-top: 8px;
+      background: #fff;
+    }
+
+    .menu-row {
+      grid-template-columns: 38px 1fr 18px;
+      column-gap: 12px;
+      padding: 10px 16px;
+      min-height: 56px;
+    }
+
+    .chevron {
+      color: #b5b5b5;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .profile {
+      padding: 28px 20px 22px;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+      background: #fff;
+    }
+
+    .profile .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 7px;
+    }
+
+    .profile h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .profile p {
+      margin: 0;
+      color: #808080;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .tabbar {
+      height: 64px;
+      padding-bottom: max(5px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: .5px solid #d8d8d8;
+      background: #f7f7f7;
+    }
+
+    .tab {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: #606060;
+      font-size: 11px;
+      position: relative;
+    }
+
+    .tab.active {
+      color: var(--wechat-green);
+    }
+
+    .tab .dot {
+      position: absolute;
+      top: 7px;
+      right: calc(50% - 19px);
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #fa5151;
+    }
+
+    .chat-detail {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: none;
+      grid-template-rows: auto auto 1fr auto;
+      background: #ededed;
+    }
+
+    .chat-detail.open {
+      display: grid;
+    }
+
+    .profile-detail {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      grid-template-rows: auto auto 1fr;
+      background: #ededed;
+    }
+
+    .profile-detail.open {
+      display: grid;
+    }
+
+    .moments-detail {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      grid-template-rows: auto auto 1fr;
+      background: #fff;
+    }
+
+    .moments-detail.open {
+      display: grid;
+    }
+
+    .chat-detail .topbar {
+      grid-template-columns: 72px 1fr 46px;
+    }
+
+    .profile-detail .topbar {
+      grid-template-columns: 72px 1fr 46px;
+    }
+
+    .moments-detail .topbar {
+      grid-template-columns: 72px 1fr 46px;
+      background: rgba(247, 247, 247, .96);
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 16px;
+    }
+
+    .back svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .messages {
+      padding: 18px 12px;
+      overflow-y: auto;
+    }
+
+    .stamp {
+      margin: 0 auto 18px;
+      width: fit-content;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #fff;
+      background: #cecece;
+      font-size: 12px;
+    }
+
+    .message {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .message.outgoing {
+      grid-template-columns: minmax(0, 1fr) 38px;
+    }
+
+    .message .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 5px;
+    }
+
+    .bubble {
+      position: relative;
+      justify-self: start;
+      max-width: 245px;
+      padding: 9px 11px;
+      border-radius: 4px;
+      background: #fff;
+      font-size: 16px;
+      line-height: 1.42;
+      word-break: break-word;
+    }
+
+    .message.outgoing .bubble {
+      justify-self: end;
+      background: var(--bubble);
+    }
+
+    .bubble::before {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: 13px;
+      width: 10px;
+      height: 10px;
+      background: inherit;
+      transform: rotate(45deg);
+      border-radius: 1px;
+    }
+
+    .message.outgoing .bubble::before {
+      left: auto;
+      right: -5px;
+    }
+
+    .media-bubble {
+      width: 190px;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .media-bubble::before {
+      display: none;
+    }
+
+    .media-bubble video {
+      display: block;
+      width: 100%;
+      border-radius: 5px;
+      background: #111;
+      cursor: zoom-in;
+    }
+
+    .media-bubble img {
+      display: block;
+      width: 100%;
+      border-radius: 5px;
+      cursor: zoom-in;
+    }
+
+    .voice-message {
+      width: var(--voice-width, 112px);
+      min-width: 94px;
+      max-width: 235px;
+      padding: 0;
+    }
+
+    .voice-button {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .voice-icon {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .voice-icon::before,
+    .voice-icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      border: 2px solid currentColor;
+      border-left: 0;
+      border-bottom-color: transparent;
+      border-top-color: transparent;
+      border-radius: 0 18px 18px 0;
+      transform: translateY(-50%);
+    }
+
+    .voice-icon::before {
+      width: 8px;
+      height: 10px;
+    }
+
+    .voice-icon::after {
+      width: 14px;
+      height: 16px;
+    }
+
+    .voice-message.playing .voice-icon::after {
+      animation: voicePulse .75s steps(2, end) infinite;
+    }
+
+    .voice-duration {
+      margin-left: auto;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    @keyframes voicePulse {
+      50% {
+        opacity: .25;
+      }
+    }
+
+    .file-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #222;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .file-chip svg {
+      width: 22px;
+      height: 22px;
+      color: var(--wechat-green);
+    }
+
+    .option-panel {
+      display: none;
+      grid-column: 1 / -1;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 0 2px 40px;
+    }
+
+    .option-panel.show {
+      display: grid;
+    }
+
+    .option-choice {
+      min-height: 34px;
+      padding: 6px 9px;
+      border-radius: 5px;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      text-align: left;
+      border: .5px solid #dcdcdc;
+    }
+
+    .composer {
+      min-height: 56px;
+      display: grid;
+      grid-template-columns: 32px 1fr 36px 32px;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 10px max(7px, env(safe-area-inset-bottom));
+      border-top: .5px solid #d6d6d6;
+      background: #f7f7f7;
+    }
+
+    .input-fake {
+      height: 38px;
+      border-radius: 5px;
+      background: #fff;
+    }
+
+    .chat-input {
+      width: 100%;
+      height: 38px;
+      min-width: 0;
+      padding: 0 9px;
+      border: 0;
+      border-radius: 5px;
+      outline: none;
+      background: #fff;
+      font: inherit;
+      font-size: 16px;
+    }
+
+    .send-btn {
+      height: 32px;
+      border-radius: 5px;
+      background: var(--wechat-green);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .send-btn:disabled {
+      background: #d5d5d5;
+      color: #888;
+    }
+
+    .placeholder {
+      padding: 42px 26px;
+      color: #8c8c8c;
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .contact-card {
+      background: #fff;
+      padding: 28px 18px 24px;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: start;
+      border-bottom: .5px solid #e5e5e5;
+    }
+
+    .contact-card .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 7px;
+    }
+
+    .contact-card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .contact-card p {
+      margin: 0;
+      color: #777;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .profile-action {
+      margin-top: 8px;
+      background: #fff;
+    }
+
+    .message-action {
+      width: 100%;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      color: var(--wechat-green);
+      font-size: 17px;
+      background: #fff;
+    }
+
+    .message-action svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .moments-feed {
+      overflow-y: auto;
+      background: #fff;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .moments-cover {
+      position: relative;
+      height: 285px;
+      background: #ddd url("背景图.jpg") center / cover no-repeat;
+    }
+
+    .moments-cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, .08), rgba(0, 0, 0, .18));
+    }
+
+    .moments-owner {
+      position: absolute;
+      right: 16px;
+      bottom: -24px;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, .45);
+    }
+
+    .moments-owner .avatar {
+      width: 68px;
+      height: 68px;
+      border: 2px solid #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+    }
+
+    .moment-list {
+      padding: 40px 0 20px;
+      background: #fff;
+    }
+
+    .moment-item {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      padding: 14px 14px 16px;
+      border-bottom: .5px solid #e5e5e5;
+    }
+
+    .moment-item .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 5px;
+    }
+
+    .moment-name {
+      margin: 0 0 5px;
+      color: #576b95;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .moment-text {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .moment-time {
+      color: #9a9a9a;
+      font-size: 12px;
+    }
+
+    .media-preview {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      place-items: center;
+      width: 100vw;
+      height: 100vh;
+      padding: 20px;
+      background: rgba(0, 0, 0, .94);
+    }
+
+    .media-preview.open {
+      display: grid;
+    }
+
+    .media-preview img,
+    .media-preview video {
+      max-width: 100%;
+      max-height: 92vh;
+      border-radius: 4px;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 50px;
+      left: 14px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .12);
+    }
+
+    .preview-close svg {
+      width: 25px;
+      height: 25px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 600px), (max-height: 700px) {
+      body {
+        padding: 0;
+        background: var(--page);
+      }
+
+      .phone {
+        width: 100vw;
+        height: 100dvh;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" aria-label="微信手机界面">
+    <section class="app" aria-label="微信">
+      <div class="statusbar">
+        <span id="clock">9:41</span>
+        <span class="signals" aria-hidden="true">
+          <span class="bars"><i></i><i></i><i></i><i></i></span>
+          <span class="wifi"></span>
+          <span class="battery"></span>
+        </span>
+      </div>
+
+      <header class="topbar">
+        <span></span>
+        <h1 id="pageTitle">微信</h1>
+        <button class="icon-btn" aria-label="添加">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </header>
+
+      <section class="view active" id="wechatView" aria-label="微信聊天列表">
+        <div class="list">
+          <button class="chat-row" data-chat="heiman" type="button">
+            <img class="avatar" src="heiman.png" alt="希敏头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">希敏</span><span class="badge" data-badge="heiman" aria-label="未读消息"></span></span>
+              <span class="preview">[视频]</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="moxi" type="button">
+            <img class="avatar" src="moxi.png" alt="青姐头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">青姐</span><span class="badge" data-badge="moxi" aria-label="未读消息"></span></span>
+              <span class="preview">半夜饿了怎么办</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="yy" type="button">
+            <img class="avatar" src="yy.png" alt="YY头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">YY</span><span class="badge" data-badge="yy" aria-label="未读消息"></span></span>
+              <span class="preview">想去超市——</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="mingwan" type="button">
+            <img class="avatar" src="mingwan.png" alt="铭婉头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">铭婉</span><span class="badge" data-badge="mingwan" aria-label="未读消息"></span></span>
+              <span class="preview">独自在国外时会有点寂寞嘛</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="linxi" type="button">
+            <img class="avatar" src="linxi.png" alt="林曦头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">林曦</span><span class="badge" data-badge="linxi" aria-label="未读消息"></span></span>
+              <span class="preview">博雅，猜猜我在哪！</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="yuhao" type="button">
+            <img class="avatar" src="yuhao.png" alt="宇昊头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">宇昊</span><span class="badge" data-badge="yuhao" aria-label="未读消息"></span></span>
+              <span class="preview">当Claude在思考的时候</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="jiangchuan" type="button">
+            <img class="avatar" src="jiangchuan.png" alt="姜川头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">姜川</span><span class="badge" data-badge="jiangchuan" aria-label="未读消息"></span></span>
+              <span class="preview">在国外第一次看到某种没见过的风景时......</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="hanyuqing" type="button">
+            <img class="avatar" src="hanyuqing.png" alt="韩玉清头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">韩玉清</span><span class="badge" data-badge="hanyuqing" aria-label="未读消息"></span></span>
+              <span class="preview">每天骑电动车都能想到博雅</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="suma" type="button">
+            <img class="avatar" src="suma.png" alt="苏妈头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">苏妈</span><span class="badge" data-badge="suma" aria-label="未读消息"></span></span>
+              <span class="preview">晴天是在英期间不可多得的宝贝! 谁懂!!!</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+          <button class="chat-row" data-chat="xiaotong" type="button">
+            <img class="avatar" src="xiaotong.png" alt="晓彤头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">晓彤</span><span class="badge" data-badge="xiaotong" aria-label="未读消息"></span></span>
+              <span class="preview">在会场的易拉宝上看到大黄，想到了博雅！</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view" id="contactsView" aria-label="通讯录">
+        <div class="list">
+          <button class="contact-row" type="button">
+            <span class="cell-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"></path></svg>
+            </span>
+            <span class="contact-name">新的朋友</span>
+          </button>
+          <button class="contact-row" type="button">
+            <span class="cell-icon">
+              <svg viewBox="0 0 24 24"><path d="M7 8h10M7 12h10M7 16h7"></path></svg>
+            </span>
+            <span class="contact-name">群聊</span>
+          </button>
+        </div>
+        <div class="section-title">H</div>
+        <div class="list">
+          <button class="contact-row" data-profile="hanyuqing" type="button">
+            <img class="avatar" src="hanyuqing.png" alt="韩玉清头像">
+            <span class="contact-name">韩玉清</span>
+          </button>
+        </div>
+        <div class="section-title">J</div>
+        <div class="list">
+          <button class="contact-row" data-profile="jiangchuan" type="button">
+            <img class="avatar" src="jiangchuan.png" alt="姜川头像">
+            <span class="contact-name">姜川</span>
+          </button>
+        </div>
+        <div class="section-title">L</div>
+        <div class="list">
+          <button class="contact-row" data-profile="linxi" type="button">
+            <img class="avatar" src="linxi.png" alt="林曦头像">
+            <span class="contact-name">林曦</span>
+          </button>
+        </div>
+        <div class="section-title">M</div>
+        <div class="list">
+          <button class="contact-row" data-profile="mingwan" type="button">
+            <img class="avatar" src="mingwan.png" alt="铭婉头像">
+            <span class="contact-name">铭婉</span>
+          </button>
+        </div>
+        <div class="section-title">Q</div>
+        <div class="list">
+          <button class="contact-row" data-profile="moxi" type="button">
+            <img class="avatar" src="moxi.png" alt="青姐头像">
+            <span class="contact-name">青姐</span>
+          </button>
+        </div>
+        <div class="section-title">S</div>
+        <div class="list">
+          <button class="contact-row" data-profile="suma" type="button">
+            <img class="avatar" src="suma.png" alt="苏妈头像">
+            <span class="contact-name">苏妈</span>
+          </button>
+        </div>
+        <div class="section-title">X</div>
+        <div class="list">
+          <button class="contact-row" data-profile="heiman" type="button">
+            <img class="avatar" src="heiman.png" alt="希敏头像">
+            <span class="contact-name">希敏</span>
+          </button>
+          <button class="contact-row" data-profile="xiaotong" type="button">
+            <img class="avatar" src="xiaotong.png" alt="晓彤头像">
+            <span class="contact-name">晓彤</span>
+          </button>
+        </div>
+        <div class="section-title">Y</div>
+        <div class="list">
+          <button class="contact-row" data-profile="yy" type="button">
+            <img class="avatar" src="yy.png" alt="YY头像">
+            <span class="contact-name">YY</span>
+          </button>
+          <button class="contact-row" data-profile="yuhao" type="button">
+            <img class="avatar" src="yuhao.png" alt="宇昊头像">
+            <span class="contact-name">宇昊</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view" id="discoverView" aria-label="发现">
+        <div class="menu-group">
+          <button class="menu-row" id="momentsEntry" type="button">
+            <span class="cell-icon">
+              <svg viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"></path><path d="M12 15v5M9 20h6"></path></svg>
+            </span>
+            <span class="contact-name">朋友圈</span>
+            <span class="chevron">›</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view" id="meView" aria-label="我">
+        <div class="profile">
+          <img class="avatar" src="me.png" alt="牙牙头像">
+          <div>
+            <h2>牙牙</h2>
+            <p>微信号：xieboya1998<br>地区：北京海淀</p>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-row" type="button">
+            <span class="cell-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M5 7h14v10H5z"></path><path d="M8 12h8"></path></svg>
+            </span>
+            <span class="contact-name">服务</span>
+            <span class="chevron">›</span>
+          </button>
+        </div>
+        <div class="menu-group">
+          <button class="menu-row" type="button">
+            <span class="cell-icon orange">
+              <svg viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6l-7-3Z"></path></svg>
+            </span>
+            <span class="contact-name">设置</span>
+            <span class="chevron">›</span>
+          </button>
+        </div>
+      </section>
+
+      <nav class="tabbar" aria-label="微信底部导航">
+        <button class="tab active" data-tab="wechat" type="button">
+          <span class="dot" data-tab-dot aria-hidden="true"></span>
+          <svg viewBox="0 0 24 24"><path d="M8.5 17.5 5 19l1-3.1A7 7 0 1 1 8.5 17.5Z"></path><path d="M16.5 10.5c2.5.5 4.5 2.3 4.5 4.7 0 1.4-.7 2.7-1.8 3.6l.7 2.2-2.5-1.1c-.7.2-1.4.3-2.2.3-2.6 0-4.8-1.4-5.6-3.4"></path></svg>
+          <span>微信</span>
+        </button>
+        <button class="tab" data-tab="contacts" type="button">
+          <svg viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M2 21c.6-4 2.7-6 6-6s5.4 2 6 6"></path><path d="M17 10a3 3 0 1 0 0-6"></path><path d="M15.5 15.5c2.8.3 4.7 2.1 5.1 5.5"></path></svg>
+          <span>通讯录</span>
+        </button>
+        <button class="tab" data-tab="discover" type="button">
+          <svg viewBox="0 0 24 24"><path d="m10 10 6-2-2 6-6 2 2-6Z"></path><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"></path></svg>
+          <span>发现</span>
+        </button>
+        <button class="tab" data-tab="me" type="button">
+          <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path><path d="M4 21c.8-4.5 3.5-7 8-7s7.2 2.5 8 7"></path></svg>
+          <span>我</span>
+        </button>
+      </nav>
+    </section>
+
+    <section class="profile-detail" id="profileDetail" aria-label="联系人信息">
+      <div class="statusbar">
+        <span id="profileClock">9:41</span>
+        <span class="signals" aria-hidden="true">
+          <span class="bars"><i></i><i></i><i></i><i></i></span>
+          <span class="wifi"></span>
+          <span class="battery"></span>
+        </span>
+      </div>
+      <header class="topbar">
+        <button class="back" id="profileBackBtn" type="button" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg>
+          <span>通讯录</span>
+        </button>
+        <h1>详细资料</h1>
+        <button class="icon-btn" type="button" aria-label="更多">
+          <svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>
+        </button>
+      </header>
+      <div>
+        <section class="contact-card">
+          <img class="avatar" id="profileAvatar" src="heiman.png" alt="">
+          <div>
+            <h2 id="profileName">希敏</h2>
+            <p id="profileMeta">昵称：Heiman<br>微信号：EimanKE<br>地区：阿曼</p>
+          </div>
+        </section>
+        <div class="profile-action">
+          <button class="message-action" id="profileMessageBtn" type="button">
+            <svg viewBox="0 0 24 24"><path d="M8.5 17.5 5 19l1-3.1A7 7 0 1 1 8.5 17.5Z"></path></svg>
+            <span>发消息</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="moments-detail" id="momentsDetail" aria-label="朋友圈">
+      <div class="statusbar">
+        <span id="momentsClock">9:41</span>
+        <span class="signals" aria-hidden="true">
+          <span class="bars"><i></i><i></i><i></i><i></i></span>
+          <span class="wifi"></span>
+          <span class="battery"></span>
+        </span>
+      </div>
+      <header class="topbar">
+        <button class="back" id="momentsBackBtn" type="button" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg>
+          <span>发现</span>
+        </button>
+        <h1>朋友圈</h1>
+        <button class="icon-btn" type="button" aria-label="相机">
+          <svg viewBox="0 0 24 24"><path d="M4 8h4l1.5-2h5L16 8h4v11H4z"></path><path d="M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path></svg>
+        </button>
+      </header>
+      <div class="moments-feed">
+        <section class="moments-cover">
+          <div class="moments-owner">
+            <span>牙牙</span>
+            <img class="avatar" src="me.png" alt="牙牙头像">
+          </div>
+        </section>
+        <div class="moment-list">
+          <article class="moment-item">
+            <img class="avatar" src="me.png" alt="牙牙头像">
+            <div>
+              <p class="moment-name">牙牙</p>
+              <p class="moment-text">今天也想认真生活。</p>
+              <span class="moment-time">刚刚</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="chat-detail" id="chatDetail" aria-label="聊天详情">
+      <div class="statusbar">
+        <span id="detailClock">9:41</span>
+        <span class="signals" aria-hidden="true">
+          <span class="bars"><i></i><i></i><i></i><i></i></span>
+          <span class="wifi"></span>
+          <span class="battery"></span>
+        </span>
+      </div>
+      <header class="topbar">
+        <button class="back" id="backBtn" type="button" aria-label="返回">
+          <svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg>
+          <span>微信</span>
+        </button>
+        <h1 id="chatName">希敏</h1>
+        <button class="icon-btn" type="button" aria-label="更多">
+          <svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>
+        </button>
+      </header>
+      <div class="messages" id="messages">
+        <div class="stamp">上午</div>
+        <div class="message">
+          <img class="avatar" id="chatAvatar" src="heiman.png" alt="">
+          <div class="bubble media-bubble"><video src="希敏A.mp4" controls playsinline preload="metadata" data-preview-type="video" data-preview-src="希敏A.mp4"></video></div>
+        </div>
+      </div>
+      <div class="composer" aria-label="输入栏">
+        <button class="icon-btn" type="button" aria-label="语音">
+          <svg viewBox="0 0 24 24"><path d="M12 5v8"></path><path d="M8 9v4a4 4 0 0 0 8 0V9"></path><path d="M5 12a7 7 0 0 0 14 0"></path><path d="M12 19v3"></path></svg>
+        </button>
+        <input class="chat-input" id="chatInput" type="text" autocomplete="off" aria-label="输入消息">
+        <button class="send-btn" id="sendBtn" type="button" disabled>发送</button>
+        <button class="icon-btn" type="button" aria-label="更多功能">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+        <div class="option-panel" id="optionPanel" aria-label="回复选项">
+          <button class="option-choice" data-option="a" type="button"></button>
+          <button class="option-choice" data-option="b" type="button"></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <section class="media-preview" id="mediaPreview" aria-label="媒体预览">
+    <button class="preview-close" id="previewClose" type="button" aria-label="关闭预览">
+      <svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg>
+    </button>
+    <div id="previewContent"></div>
+  </section>
+
+  <script>
+    const data = {
+      wechat: { title: "微信", view: "wechatView" },
+      contacts: { title: "通讯录", view: "contactsView" },
+      discover: { title: "发现", view: "discoverView" },
+      me: { title: "我", view: "meView" }
+    };
+
+    const me = {
+      name: "牙牙",
+      avatar: "me.png"
+    };
+
+    const chats = {
+      heiman: {
+        id: "heiman",
+        name: "希敏",
+        nickname: "Heiman",
+        wechatId: "EimanKE",
+        region: "阿曼",
+        avatar: "heiman.png",
+        message: "[视频]",
+        initialMessages: [
+          { type: "video", src: "希敏A.mp4", label: "希敏A.mp4" }
+        ],
+        delayedMessages: [
+          { delay: 30000, type: "text", text: "当你觉得大山中学莫名其妙时......" }
+        ],
+        unread: true,
+        completed: false,
+        options: {
+          a: "啊？展开讲讲",
+          b: "诶，我不觉得"
+        },
+        nextMessages: [
+          { type: "video", src: "锦囊-heiman.mp4", label: "锦囊-heiman.mp4" }
+        ]
+      },
+      yy: {
+        id: "yy",
+        name: "YY",
+        nickname: "YY^^",
+        wechatId: "always792952",
+        region: "天津和平",
+        avatar: "yy.png",
+        message: "想去超市——",
+        unread: true,
+        completed: false,
+        options: {
+          a: "等回国咱就出发！",
+          b: "哎呀，俺不想动"
+        },
+        nextMessages: [
+          { delay: 2000, type: "text", text: "嘿嘿，我特别喜欢逛超市！" },
+          { delay: 4000, type: "text", text: "在国外逛超市感觉也会很好玩——" },
+          { delay: 6000, type: "text", text: "然后就想起来好像还没有和博雅一起去过超市" },
+          { delay: 8000, type: "text", text: "于是想邀请博雅一起去超市！" },
+          { delay: 10000, type: "text", text: "我们找一天进城玩儿吧！万象天地新开了茶颜悦色，还有一家很好吃的gelato！顺便逛超市——" },
+          { delay: 12000, type: "text", text: "博雅生日快乐！新的一岁健康快乐，享受生活——" },
+          { delay: 14000, type: "text", text: "想要的都拥有，烦人的都走开——" }
+        ]
+      },
+      moxi: {
+        id: "moxi",
+        name: "青姐",
+        nickname: "莫西",
+        wechatId: "cq1336657321",
+        region: "四川广元",
+        avatar: "moxi.png",
+        message: "半夜饿了怎么办",
+        unread: true,
+        completed: false,
+        options: {
+          a: "你吃，我不能吃",
+          b: "我们去罗森 直接开吃！"
+        },
+        nextMessages: [
+          { type: "text", text: "这是一份送给牙牙的深夜“激”饿指南（伤害性极大嘿嘿嘿）" },
+          { delay: 2000, type: "text", text: "半夜饿了时，怎么办呀！" },
+          { delay: 4000, type: "image", src: "qingjie-3.jpeg", label: "深夜饥饿图 1" },
+          { delay: 6000, type: "text", text: "我请你吃蒸羊羔、蒸熊掌、蒸鹿尾儿、烧花鸭、烧雏鸡、烧子鹅……" },
+          { delay: 8000, type: "text", text: "达咩！" },
+          { delay: 10000, type: "text", text: "大半夜吃这些太油腻了  胃受到一亿点伤害！！！" },
+          { delay: 12000, type: "text", text: "那请你吃 白菜 生菜 黄瓜 甘蓝 西蓝花……" },
+          { delay: 14000, type: "text", text: "稍等，这就去给你割草" },
+          { delay: 16000, type: "image", src: "qingjie-9.jpeg", label: "深夜饥饿图 2" },
+          { delay: 18000, type: "text", text: "一亿年过去了……我们可以来看看美食" },
+          { delay: 20000, type: "video", src: "v1.mp4", label: "v1.mp4" },
+          { delay: 22000, type: "video", src: "v2.mp4", label: "v2.mp4" },
+          { delay: 24000, type: "video", src: "v3.mp4", label: "v3.mp4" },
+          { delay: 26000, type: "video", src: "v4.mp4", label: "v4.mp4" },
+          { delay: 28000, type: "text", text: "啥？你觉得一般,这你总会馋的流口水吧🤤" },
+          { delay: 30000, type: "text", text: "插入链接：https://www.xiaohongshu.com/explore/69e37641000000001a03350b?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBvENTfNXqn5M_Hwq2qoS260SpvyonoQfgTp3J_xi2AIg=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776539811&share_id=28cf79d1282b4b03bc584ae4551cf189&share_channel=wechat" },
+          { delay: 32000, type: "text", text: "https://www.xiaohongshu.com/explore/69cb1bae000000002301ebfd?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBXxt1mH36nkLgz-esSjaSBjwCsfLgkQVY3nXUtgAi8Y4=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776370188&share_id=7a29633c7fb944a09b2d02534cb47d57&share_channel=wechat" },
+          { delay: 34000, type: "text", text: "https://www.xiaohongshu.com/explore/6931052e000000001e005253?app_platform=android&ignoreEngage=true&app_version=9.26.1&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBVn_XhWorngqvgzgBxTPcYKaUBW_1VwAWcgyAqoKvJd0=&author_share=1&xhsshare=&shareRedId=ODlEN0k1OEA2NzUyOTgwNjg5OTc6ODxB&apptime=1777014085&share_id=c1f2b220e35a439fadbe1e03edc6e038&share_channel=wechat" },
+          { delay: 36000, type: "text", text: "建议直接拉到最后  不然就可以起来了" },
+          { delay: 38000, type: "image", src: "qingjie-20.jpeg", label: "深夜饥饿图 3" },
+          { delay: 40000, type: "text", text: "草来了  饭缩力拉满" },
+          { delay: 42000, type: "text", text: "什么" },
+          { delay: 44000, type: "text", text: "大黄：我爱吃 我爱吃" },
+          { delay: 46000, type: "image", src: "qingjie-24.png", label: "深夜饥饿图 4" },
+          { delay: 48000, type: "text", text: "以上都是娱乐，但我的姐妹，希望你人生的每一天都能吃的开心，吃的尽兴！" },
+          { delay: 50000, type: "text", text: "生日快乐！" }
+        ]
+      },
+      mingwan: {
+        id: "mingwan",
+        name: "铭婉",
+        nickname: "山下有猫子",
+        wechatId: "sunmw1235",
+        region: "英国巴斯",
+        avatar: "mingwan.png",
+        message: "独自在国外时会有点寂寞嘛",
+        unread: true,
+        completed: false,
+        options: {
+          a: "会的",
+          b: "其实还好啦"
+        },
+        nextMessages: [
+          { type: "video", src: "58_raw.MP4", label: "58_raw.MP4" }
+        ]
+      },
+      linxi: {
+        id: "linxi",
+        name: "林曦",
+        nickname: "X",
+        wechatId: "LX451945228",
+        region: "未填写",
+        avatar: "linxi.png",
+        message: "博雅，猜猜我在哪！",
+        unread: true,
+        completed: false,
+        options: {
+          a: "在哪里呀？",
+          b: "反正不在英国"
+        },
+        nextMessages: [
+          { type: "video", src: "LX.mp4", label: "LX.mp4" }
+        ]
+      },
+      jiangchuan: {
+        id: "jiangchuan",
+        name: "姜川",
+        nickname: "姜chuan",
+        wechatId: "未填写",
+        region: "巴拿马",
+        avatar: "jiangchuan.png",
+        message: "在国外第一次看到某种没见过的风景时......",
+        unread: true,
+        completed: false,
+        options: {
+          a: "嗯？",
+          b: "国内啥都有"
+        },
+        nextMessages: [
+          { type: "text", text: "师姐，你看到的那些，我们这边看不到。多拍点，多记点。" },
+          { delay: 2000, type: "audio", src: "博雅生日快乐-姜川.aac", label: "博雅生日快乐-姜川.aac" }
+        ]
+      },
+      hanyuqing: {
+        id: "hanyuqing",
+        name: "韩玉清",
+        nickname: "孟起",
+        wechatId: "未填写",
+        region: "广东广州",
+        avatar: "hanyuqing.png",
+        message: "每天骑电动车都能想到博雅",
+        unread: true,
+        completed: false,
+        options: {
+          a: "没错，因为是我和希敏的电动车",
+          b: "哈哈，车送你了"
+        },
+        nextMessages: [
+          { type: "video", src: "hyq.mp4", label: "hyq.mp4" },
+          { delay: 2000, type: "text", text: "想打麻将的时候也想到博雅" }
+        ]
+      },
+      suma: {
+        id: "suma",
+        name: "苏妈",
+        nickname: "見見",
+        wechatId: "未填写",
+        region: "芬兰",
+        avatar: "suma.png",
+        message: "晴天是在英期间不可多得的宝贝! 谁懂!!!",
+        unread: true,
+        completed: false,
+        options: {
+          a: "我我我",
+          b: "阴天——在没开灯的房间——"
+        },
+        nextMessages: [
+          { type: "text", text: "我真的超爱晴天，蓝天白云、阳光灿烂，心情也跟着自动明媚起来。" },
+          { delay: 2000, type: "text", text: "一起晒晒太阳吧!晒掉身上的负能量和坏情绪，晒掉近期的水逆和霉运;在这春日时节里，也如同万物般自由舒展、肆意生长~" },
+          { delay: 4000, type: "text", text: "祝愿你可以拥有更多的大好晴天，带着美雨心情，背着球拍，迈着轻盈的步伐，一路鸟语花香、和风徐徐，然后再打一场酣畅淋漓、肆意忘情的球!" },
+          { delay: 6000, type: "text", text: "生日快乐，我远方的朋友！天天开心，不止今天" },
+          { delay: 8000, type: "text", text: "继续高飞吧，继续向上吧!不止在晴天" },
+          { delay: 10000, type: "text", text: "附赠一张我很喜欢的蓝天 (拍摄于老家，去年初秋)" },
+          { delay: 12000, type: "image", src: "suma-sky.png", label: "蓝天" }
+        ]
+      },
+      xiaotong: {
+        id: "xiaotong",
+        name: "晓彤",
+        nickname: "(^･ｪ･^)",
+        wechatId: "未填写",
+        region: "中国大陆",
+        avatar: "xiaotong.png",
+        message: "在会场的易拉宝上看到大黄，想到了博雅！",
+        unread: true,
+        completed: false,
+        options: {
+          a: "黄总——",
+          b: "我一点不想大黄！"
+        },
+        nextMessages: [
+          { type: "image", src: "xiaotong-1.png", label: "会场照片" },
+          { delay: 2000, type: "text", text: "想起你们俩个一起在办公室的乐趣时刻" },
+          { delay: 4000, type: "video", src: "2799_1776999760_raw.mp4", label: "2799_1776999760_raw.mp4" },
+          { delay: 6000, type: "text", text: "还有，练普拉提也会想到你，还有实在无法忍住不吃晚饭的时候，也会想到" },
+          { delay: 8000, type: "audio", src: "20260424_110328.m4a", label: "20260424_110328.m4a" }
+        ]
+      },
+      yuhao: {
+        id: "yuhao",
+        name: "宇昊",
+        nickname: "Fly.Carrot",
+        wechatId: "David-carrot",
+        region: "江苏苏州",
+        avatar: "yuhao.png",
+        message: "当Claude在思考的时候",
+        unread: true,
+        completed: false,
+        options: {
+          a: "会发生什么呢",
+          b: "我不用Claude"
+        },
+        nextMessages: [
+          { type: "image", src: "cyh.jpg", label: "cyh.jpg" },
+          { delay: 3000, type: "audio", src: "博雅生日快乐！.m4a", label: "博雅生日快乐！.m4a" }
+        ]
+      },
+      };
+
+    let currentChatId = null;
+    let currentProfileId = null;
+    let displayTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let delayedMessageTimer = null;
+    let activeVoiceAudio = null;
+    let activeVoiceBubble = null;
+
+    const pageTitle = document.querySelector("#pageTitle");
+    const tabs = document.querySelectorAll(".tab");
+    const views = document.querySelectorAll(".view");
+    const chatDetail = document.querySelector("#chatDetail");
+    const profileDetail = document.querySelector("#profileDetail");
+    const momentsDetail = document.querySelector("#momentsDetail");
+    const messages = document.querySelector("#messages");
+    const chatInput = document.querySelector("#chatInput");
+    const sendBtn = document.querySelector("#sendBtn");
+    const optionPanel = document.querySelector("#optionPanel");
+    const mediaPreview = document.querySelector("#mediaPreview");
+    const previewContent = document.querySelector("#previewContent");
+
+    function setTime() {
+      const now = new Date();
+      const time = new Intl.DateTimeFormat("zh-CN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: displayTimeZone
+      }).format(now);
+      document.querySelector("#clock").textContent = time;
+      document.querySelector("#detailClock").textContent = time;
+      document.querySelector("#profileClock").textContent = time;
+      document.querySelector("#momentsClock").textContent = time;
+    }
+
+    async function setTimeZoneFromIp() {
+      try {
+        const response = await fetch("https://ipapi.co/json/");
+        if (!response.ok) throw new Error("timezone lookup failed");
+        const data = await response.json();
+        if (data && data.timezone) {
+          displayTimeZone = data.timezone;
+          setTime();
+        }
+      } catch (error) {
+        setTime();
+      }
+    }
+
+    function switchTab(tabName) {
+      const tab = data[tabName];
+      if (!tab) return;
+      pageTitle.textContent = tab.title;
+      tabs.forEach(item => item.classList.toggle("active", item.dataset.tab === tabName));
+      views.forEach(view => view.classList.toggle("active", view.id === tab.view));
+      chatDetail.classList.remove("open");
+      profileDetail.classList.remove("open");
+      momentsDetail.classList.remove("open");
+      clearDelayedMessages();
+      stopActiveVoice();
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function updateUnreadBadges() {
+      Object.entries(chats).forEach(([id, chat]) => {
+        document.querySelectorAll(`[data-badge="${id}"]`).forEach(badge => {
+          badge.hidden = !chat.unread;
+        });
+      });
+      const hasUnread = Object.values(chats).some(chat => chat.message && chat.unread);
+      const tabDot = document.querySelector("[data-tab-dot]");
+      if (tabDot) tabDot.hidden = !hasUnread;
+    }
+
+    function scrollMessagesToBottom() {
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function appendMessage({ sender, type = "text", text = "", src = "", label = "" }, options = {}) {
+      const outgoing = sender === "me";
+      const avatar = outgoing ? me.avatar : chats[currentChatId].avatar;
+      const name = outgoing ? me.name : chats[currentChatId].name;
+      const article = document.createElement("div");
+      article.className = `message${outgoing ? " outgoing" : ""}`;
+
+      let bubbleContent = escapeHtml(text);
+      let bubbleClass = "bubble";
+      if (type === "video") {
+        bubbleClass = "bubble media-bubble";
+        bubbleContent = `<video src="${escapeHtml(src)}" controls playsinline preload="metadata" data-preview-type="video" data-preview-src="${escapeHtml(src)}"></video>`;
+      } else if (type === "image") {
+        bubbleClass = "bubble media-bubble";
+        bubbleContent = `<img src="${escapeHtml(src)}" alt="${escapeHtml(label || "图片消息")}" data-preview-type="image" data-preview-src="${escapeHtml(src)}">`;
+      } else if (type === "audio") {
+        bubbleClass = "bubble voice-message";
+        bubbleContent = `
+          <button class="voice-button" type="button" data-audio-src="${escapeHtml(src)}">
+            <span class="voice-icon" aria-hidden="true"></span>
+            <span class="voice-duration">...</span>
+          </button>
+        `;
+      } else if (type === "file") {
+        bubbleContent = `
+          <a class="file-chip" href="${escapeHtml(src)}" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"></path><path d="M14 3v5h5"></path></svg>
+            <span>${escapeHtml(label || src)}</span>
+          </a>
+        `;
+      }
+
+      if (outgoing) {
+        article.innerHTML = `<div class="${bubbleClass}">${bubbleContent}</div><img class="avatar" src="${avatar}" alt="${name}头像">`;
+      } else {
+        article.innerHTML = `<img class="avatar" src="${avatar}" alt="${name}头像"><div class="${bubbleClass}">${bubbleContent}</div>`;
+      }
+      messages.appendChild(article);
+      hydrateVoiceMessages(article);
+      if (options.save !== false && currentChatId) {
+        const chat = chats[currentChatId];
+        chat.history = chat.history || [];
+        chat.history.push({ sender, type, text, src, label });
+      }
+      scrollMessagesToBottom();
+    }
+
+    function openMediaPreview(type, src) {
+      previewContent.innerHTML = type === "video"
+        ? `<video src="${escapeHtml(src)}" controls playsinline preload="metadata"></video>`
+        : `<img src="${escapeHtml(src)}" alt="图片预览">`;
+      mediaPreview.classList.add("open");
+    }
+
+    function closeMediaPreview() {
+      mediaPreview.classList.remove("open");
+      previewContent.innerHTML = "";
+    }
+
+    function formatVoiceDuration(duration) {
+      if (!Number.isFinite(duration) || duration <= 0) return '1"';
+      return `${Math.max(1, Math.round(duration))}"`;
+    }
+
+    function voiceWidth(duration) {
+      const seconds = Number.isFinite(duration) ? duration : 1;
+      return `${Math.min(235, Math.max(94, 82 + Math.round(seconds) * 4))}px`;
+    }
+
+    function hydrateVoiceMessages(scope = document) {
+      scope.querySelectorAll(".voice-button").forEach(button => {
+        if (button.dataset.ready) return;
+        button.dataset.ready = "true";
+        const probe = new Audio(button.dataset.audioSrc);
+        probe.preload = "metadata";
+        probe.addEventListener("loadedmetadata", () => {
+          const duration = probe.duration;
+          button.dataset.duration = String(duration);
+          button.closest(".voice-message").style.setProperty("--voice-width", voiceWidth(duration));
+          button.querySelector(".voice-duration").textContent = formatVoiceDuration(duration);
+        });
+        probe.addEventListener("error", () => {
+          button.querySelector(".voice-duration").textContent = '1"';
+        });
+      });
+    }
+
+    function stopActiveVoice() {
+      if (activeVoiceAudio) {
+        activeVoiceAudio.pause();
+        activeVoiceAudio.currentTime = 0;
+      }
+      if (activeVoiceBubble) activeVoiceBubble.classList.remove("playing");
+      activeVoiceAudio = null;
+      activeVoiceBubble = null;
+    }
+
+    function playVoice(button) {
+      const bubble = button.closest(".voice-message");
+      if (activeVoiceBubble === bubble) {
+        stopActiveVoice();
+        return;
+      }
+      stopActiveVoice();
+      activeVoiceAudio = new Audio(button.dataset.audioSrc);
+      activeVoiceBubble = bubble;
+      bubble.classList.add("playing");
+      activeVoiceAudio.addEventListener("ended", stopActiveVoice, { once: true });
+      activeVoiceAudio.play().catch(stopActiveVoice);
+    }
+
+    function saveMessageToChat(chat, message) {
+      chat.history = chat.history || [];
+      chat.history.push({
+        sender: "them",
+        type: message.type || "text",
+        text: message.text || "",
+        src: message.src || "",
+        label: message.label || ""
+      });
+    }
+
+    function deliverReplyMessage(chat, message) {
+      if (currentChatId === chat.id && chatDetail.classList.contains("open")) {
+        appendMessage({ sender: "them", ...message });
+        return;
+      }
+      saveMessageToChat(chat, message);
+    }
+
+    function renderInitialMessages(chat) {
+      messages.innerHTML = `<div class="stamp">上午</div>`;
+      if (!chat.unread && chat.history && chat.history.length) {
+        chat.history.forEach(message => appendMessage(message, { save: false }));
+        return;
+      }
+      chat.history = [];
+      const initialMessages = chat.initialMessages || [{ type: "text", text: chat.message }];
+      initialMessages.forEach(message => appendMessage({ sender: "them", ...message }));
+      if (chat.delayedShown && chat.delayedMessages) {
+        chat.delayedMessages.forEach(message => appendMessage({ sender: "them", ...message }));
+      }
+    }
+
+    function clearDelayedMessages() {
+      if (delayedMessageTimer) {
+        clearTimeout(delayedMessageTimer);
+        delayedMessageTimer = null;
+      }
+    }
+
+    function scheduleDelayedMessages(chatId) {
+      clearDelayedMessages();
+      const chat = chats[chatId];
+      if (!chat || !chat.unread || !chat.delayedMessages || chat.delayedShown) return;
+      const [message] = chat.delayedMessages;
+      delayedMessageTimer = setTimeout(() => {
+        if (currentChatId !== chatId || !chatDetail.classList.contains("open")) return;
+        appendMessage({ sender: "them", ...message });
+        chat.delayedShown = true;
+        delayedMessageTimer = null;
+        renderOptions();
+      }, message.delay);
+    }
+
+    function renderOptions() {
+      const chat = chats[currentChatId];
+      const delayedReady = !chat || !chat.delayedMessages || chat.delayedShown;
+      const hasOptions = Boolean(chat && chat.options && !chat.completed && delayedReady);
+      optionPanel.classList.toggle("show", hasOptions);
+      if (!hasOptions) return;
+      optionPanel.querySelector('[data-option="a"]').textContent = `A ${chat.options.a}`;
+      optionPanel.querySelector('[data-option="b"]').textContent = `B ${chat.options.b}`;
+    }
+
+    function openChat(id) {
+      const chat = chats[id];
+      if (!chat || !chat.message) return;
+      currentChatId = id;
+      document.querySelector("#chatName").textContent = chat.name;
+      renderInitialMessages(chat);
+      renderOptions();
+      if (chat.unread) scheduleDelayedMessages(id);
+      chatInput.value = "";
+      sendBtn.disabled = true;
+      profileDetail.classList.remove("open");
+      chatDetail.classList.add("open");
+      setTimeout(() => chatInput.focus(), 80);
+    }
+
+    function openProfile(id) {
+      const contact = chats[id];
+      if (!contact) return;
+      currentProfileId = id;
+      document.querySelector("#profileAvatar").src = contact.avatar;
+      document.querySelector("#profileAvatar").alt = `${contact.name}头像`;
+      document.querySelector("#profileName").textContent = contact.name;
+      document.querySelector("#profileMeta").innerHTML = `昵称：${escapeHtml(contact.nickname)}<br>微信号：${escapeHtml(contact.wechatId)}<br>地区：${escapeHtml(contact.region)}`;
+      document.querySelector("#profileMessageBtn").hidden = !contact.message;
+      profileDetail.classList.add("open");
+    }
+
+    function markRead(id) {
+      const chat = chats[id];
+      if (!chat) return;
+      chat.unread = false;
+      updateUnreadBadges();
+    }
+
+    function sendText(text) {
+      const value = text.trim();
+      if (!value || !currentChatId) return;
+      appendMessage({ sender: "me", text: value });
+      chatInput.value = "";
+      sendBtn.disabled = true;
+    }
+
+    function chooseOption(option) {
+      const chat = chats[currentChatId];
+      if (!chat || !chat.options) return;
+
+      if (option === "a") {
+        sendText(chat.options.a);
+        markRead(currentChatId);
+        chat.completed = true;
+        optionPanel.classList.remove("show");
+        setTimeout(() => {
+          chat.nextMessages.forEach(message => {
+            if (message.delay) {
+              setTimeout(() => {
+                deliverReplyMessage(chat, message);
+              }, message.delay);
+              return;
+            }
+            deliverReplyMessage(chat, message);
+          });
+        }, 360);
+        return;
+      }
+
+      sendText(chat.options.b);
+      setTimeout(() => {
+        appendMessage({ sender: "them", text: "再回复一次！" });
+        renderOptions();
+      }, 300);
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+    });
+
+    document.querySelectorAll(".chat-row[data-chat]").forEach(row => {
+      row.addEventListener("click", () => openChat(row.dataset.chat));
+    });
+
+    document.querySelectorAll("[data-profile]").forEach(row => {
+      row.addEventListener("click", () => openProfile(row.dataset.profile));
+    });
+
+    document.querySelector("#backBtn").addEventListener("click", () => {
+      chatDetail.classList.remove("open");
+      clearDelayedMessages();
+      stopActiveVoice();
+    });
+
+    document.querySelector("#profileBackBtn").addEventListener("click", () => {
+      profileDetail.classList.remove("open");
+    });
+
+    document.querySelector("#profileMessageBtn").addEventListener("click", () => {
+      if (currentProfileId) openChat(currentProfileId);
+    });
+
+    document.querySelector("#momentsEntry").addEventListener("click", () => {
+      momentsDetail.classList.add("open");
+    });
+
+    document.querySelector("#momentsBackBtn").addEventListener("click", () => {
+      momentsDetail.classList.remove("open");
+    });
+
+    messages.addEventListener("click", event => {
+      const voice = event.target.closest(".voice-button");
+      if (voice) {
+        playVoice(voice);
+        return;
+      }
+      const media = event.target.closest("[data-preview-type]");
+      if (!media) return;
+      openMediaPreview(media.dataset.previewType, media.dataset.previewSrc);
+    });
+
+    document.querySelector("#previewClose").addEventListener("click", closeMediaPreview);
+
+    mediaPreview.addEventListener("click", event => {
+      if (event.target === mediaPreview) closeMediaPreview();
+    });
+
+    chatInput.addEventListener("input", () => {
+      sendBtn.disabled = chatInput.value.trim().length === 0;
+      renderOptions();
+    });
+
+    chatInput.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !sendBtn.disabled) {
+        sendText(chatInput.value);
+      }
+    });
+
+    sendBtn.addEventListener("click", () => sendText(chatInput.value));
+
+    optionPanel.querySelectorAll("[data-option]").forEach(button => {
+      button.addEventListener("click", () => chooseOption(button.dataset.option));
+    });
+
+    setTime();
+    setTimeZoneFromIp();
+    updateUnreadBadges();
+    setInterval(setTime, 30000);
+  </script>
+</body>
+</html>
