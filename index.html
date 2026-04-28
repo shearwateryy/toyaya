@@ -1016,6 +1016,14 @@
             </span>
             <span class="time">上午</span>
           </button>
+          <button class="chat-row" data-chat="xiaotong2" type="button">
+            <img class="avatar" src="xt.png" alt="晓童头像">
+            <span class="row-main">
+              <span class="name-line"><span class="name">晓童</span><span class="badge" data-badge="xiaotong2" aria-label="未读消息"></span></span>
+              <span class="preview">博雅，你看这是啥</span>
+            </span>
+            <span class="time">上午</span>
+          </button>
         </div>
       </section>
 
@@ -1085,6 +1093,10 @@
           <button class="contact-row" data-profile="xiaotong" type="button">
             <img class="avatar" src="xiaotong.png" alt="晓彤头像">
             <span class="contact-name">晓彤</span>
+          </button>
+          <button class="contact-row" data-profile="xiaotong2" type="button">
+            <img class="avatar" src="xt.png" alt="晓童头像">
+            <span class="contact-name">晓童</span>
           </button>
         </div>
         <div class="section-title">Y</div>
@@ -1379,9 +1391,9 @@
           { delay: 24000, type: "video", src: "v3.mp4", label: "v3.mp4" },
           { delay: 26000, type: "video", src: "v4.mp4", label: "v4.mp4" },
           { delay: 28000, type: "text", text: "啥？你觉得一般,这你总会馋的流口水吧🤤" },
-          { delay: 30000, type: "text", text: "插入链接：https://www.xiaohongshu.com/explore/69e37641000000001a03350b?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBvENTfNXqn5M_Hwq2qoS260SpvyonoQfgTp3J_xi2AIg=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776539811&share_id=28cf79d1282b4b03bc584ae4551cf189&share_channel=wechat" },
-          { delay: 32000, type: "text", text: "https://www.xiaohongshu.com/explore/69cb1bae000000002301ebfd?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBXxt1mH36nkLgz-esSjaSBjwCsfLgkQVY3nXUtgAi8Y4=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776370188&share_id=7a29633c7fb944a09b2d02534cb47d57&share_channel=wechat" },
-          { delay: 34000, type: "text", text: "https://www.xiaohongshu.com/explore/6931052e000000001e005253?app_platform=android&ignoreEngage=true&app_version=9.26.1&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBVn_XhWorngqvgzgBxTPcYKaUBW_1VwAWcgyAqoKvJd0=&author_share=1&xhsshare=&shareRedId=ODlEN0k1OEA2NzUyOTgwNjg5OTc6ODxB&apptime=1777014085&share_id=c1f2b220e35a439fadbe1e03edc6e038&share_channel=wechat" },
+          { delay: 30000, type: "file", src: "https://www.xiaohongshu.com/explore/69e37641000000001a03350b?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBvENTfNXqn5M_Hwq2qoS260SpvyonoQfgTp3J_xi2AIg=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776539811&share_id=28cf79d1282b4b03bc584ae4551cf189&share_channel=wechat", label: "小红书链接 1" },
+          { delay: 32000, type: "file", src: "https://www.xiaohongshu.com/explore/69cb1bae000000002301ebfd?app_platform=android&ignoreEngage=true&app_version=9.25.0&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBXxt1mH36nkLgz-esSjaSBjwCsfLgkQVY3nXUtgAi8Y4=&author_share=1&xhsshare=&shareRedId=N0tIMUU2NUA2NzUyOTgwNjY0OThIOUxO&apptime=1776370188&share_id=7a29633c7fb944a09b2d02534cb47d57&share_channel=wechat", label: "小红书链接 2" },
+          { delay: 34000, type: "file", src: "https://www.xiaohongshu.com/explore/6931052e000000001e005253?app_platform=android&ignoreEngage=true&app_version=9.26.1&share_from_user_hidden=true&xsec_source=app_share&type=video&xsec_token=CBVn_XhWorngqvgzgBxTPcYKaUBW_1VwAWcgyAqoKvJd0=&author_share=1&xhsshare=&shareRedId=ODlEN0k1OEA2NzUyOTgwNjg5OTc6ODxB&apptime=1777014085&share_id=c1f2b220e35a439fadbe1e03edc6e038&share_channel=wechat", label: "小红书链接 3" },
           { delay: 36000, type: "text", text: "建议直接拉到最后  不然就可以起来了" },
           { delay: 38000, type: "image", src: "qingjie-20.jpeg", label: "深夜饥饿图 3" },
           { delay: 40000, type: "text", text: "草来了  饭缩力拉满" },
@@ -1510,6 +1522,34 @@
           { delay: 4000, type: "video", src: "晓彤.mp4", label: "晓彤.mp4" },
           { delay: 6000, type: "text", text: "还有，练普拉提也会想到你，还有实在无法忍住不吃晚饭的时候，也会想到" },
           { delay: 8000, type: "audio", src: "20260424_110328.m4a", label: "20260424_110328.m4a" }
+        ]
+      },
+      xiaotong2: {
+        id: "xiaotong2",
+        name: "晓童",
+        nickname: "tree苹果",
+        wechatId: "未填写",
+        region: "英国牛津",
+        avatar: "xt.png",
+        message: "博雅，你看这是啥",
+        initialMessages: [
+          { type: "image", src: "zy.jpg", label: "zy.jpg" },
+          { delay: 0, type: "text", text: "博雅，你看这是啥" }
+        ],
+        unread: true,
+        completed: false,
+        options: {
+          a: "让我们大声喊出ta的名字——",
+          b: "隔着屏幕已经有苦感了"
+        },
+        nextMessages: [
+          { delay: 2000, type: "text", text: "香槟！！！！" },
+          { delay: 4000, type: "text", text: "不知道大西洋的海风吹过之后，你的身体状况感觉有没有好一些？" },
+          { delay: 6000, type: "text", text: "如果还是喝回了熟悉的中式拿铁，可以搭配奇怪的BGM一同服用，效果更怪" },
+          { delay: 8000, type: "file", src: "https://music.163.com/song?id=25640073&uct2=U2FsdGVkX1/dnmTVshOFSGjw7cbxATTt8zrZUaa835c=", label: "网易云音乐" },
+          { delay: 10000, type: "text", text: "不过，最好的最好还是不再“自讨苦吃”" },
+          { delay: 12000, type: "text", text: "希望博雅身体健康，万事无忧" },
+          { delay: 14000, type: "text", text: "新的一岁，多与快乐和健康常相伴，和所有的烦恼说ﾉBye~ﾉBye~（唱了出来）" }
         ]
       },
       yuhao: {
